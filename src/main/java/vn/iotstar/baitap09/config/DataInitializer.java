@@ -1,5 +1,6 @@
 package vn.iotstar.baitap09.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,24 +11,26 @@ import vn.iotstar.baitap09.repository.RoleRepository;
 import vn.iotstar.baitap09.repository.UserRepository;
 
 @Configuration
+@RequiredArgsConstructor
 public class DataInitializer {
+
     @Bean
-    CommandLineRunner initData(RoleRepository roles, UserRepository users, PasswordEncoder encoder) {
+    CommandLineRunner init(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            String adminEmail = "admin@gmail.com";
-            String adminPassword = "123";
+            Role userRole = roleRepository.findByName("ROLE_USER")
+                    .orElseGet(() -> roleRepository.save(Role.builder().name("ROLE_USER").build()));
 
-            Role userRole = roles.findByNameIgnoreCase("USER").orElseGet(() -> roles.save(new Role("USER")));
-            Role adminRole = roles.findByNameIgnoreCase("ADMIN").orElseGet(() -> roles.save(new Role("ADMIN")));
-
-            if (!users.existsByEmailIgnoreCase(adminEmail)) {
-                User admin = new User();
-                admin.setEmail(adminEmail);
-                admin.setFullName("System Administrator");
-                admin.setPassword(encoder.encode(adminPassword));
-                admin.setRole(adminRole);
-                admin.setEnabled(true);
-                users.save(admin);
+            if (userRepository.findByUsername("user01").isEmpty()) {
+                User user = User.builder()
+                        .username("user01")
+                        .email("user01@gmail.com")
+                        .password(passwordEncoder.encode("123456"))
+                        .fullName("Ngô Minh Khánh")
+                        .images("/images/user.png")
+                        .role(userRole)
+                        .enabled(true)
+                        .build();
+                userRepository.save(user);
             }
         };
     }

@@ -1,5 +1,7 @@
 package vn.iotstar.baitap09.service;
 
-public class UserService {
+import vn.iotstar.baitap09.dto.UserDTO;
 
+public interface UserService {
+    UserDTO findById(Long id);
 }
